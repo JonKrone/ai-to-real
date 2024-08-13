@@ -1,0 +1,26 @@
+{
+  "name": "ai-to-real",
+  "version": "1.0.0",
+  "description": "AI-assisted rapid prototyping and deployment pipeline",
+  "type": "module",
+  "scripts": {
+    "create-app": "tsx scripts/pipeline/createApp.js",
+    "deploy-app": "tsx scripts/pipeline/deployApp.js"
+  },
+  "author": "Jonathan Krone <JonathanKrone@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^1.35.3",
+    "@vercel/client": "^12.0.4",
+    "fs-extra": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.2.0",
+    "cloudflare": "^3.5.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4",
+    "zx": "^8.1.4"
+  }
+}
