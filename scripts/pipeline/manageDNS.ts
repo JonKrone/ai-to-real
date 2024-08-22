@@ -2,54 +2,67 @@ import { Cloudflare } from 'cloudflare';
 
 // Initialize Cloudflare client
 const cf = new Cloudflare({
-  token: process.env.CLOUDFLARE_KRONE_SH_DNS_TOKEN
+  apiToken: process.env.CLOUDFLARE_KRONE_SH_DNS_TOKEN
 });
 
-const zoneId = process.env.CLOUDFLARE_ZONE_ID;
+const ZoneId = process.env.CLOUDFLARE_ZONE_ID;
+const TargetDomain = 'krone.sh'
+const VercelCNAME = 'cname.vercel-dns.com'
 
-export async function createSubdomain(appName: string, targetDomain: string): Promise<void> {
-  if (!zoneId) {
+export async function getSubdomain(subdomain: string) {
+  if (!ZoneId) {
     throw new Error('CLOUDFLARE_ZONE_ID is not set');
   }
 
-  const subdomain = `${appName}.yourdomain.com`;
+  const records = await cf.dns.records.list({
+    zone_id: ZoneId
+  });
+
+  return records.result.find(r => r.name === subdomain);
+}
+
+export async function createSubdomain(subdomain: string) {
+  if (!ZoneId) {
+    throw new Error('CLOUDFLARE_ZONE_ID is not set');
+  }
 
   try {
-    const response = await cf.dnsRecords.add(zoneId, {
+    const response = await cf.dns.records.create({
+      zone_id: ZoneId,
       type: 'CNAME',
       name: subdomain,
-      content: targetDomain,
+      content: VercelCNAME,
       ttl: 1, // Auto
       proxied: true
     });
 
-    console.log(`Subdomain ${subdomain} created and pointed to ${targetDomain}`);
+    console.log(`Subdomain CNAME record for ${subdomain}.${TargetDomain} created.`);
     console.log('DNS Record ID:', response.id);
+
+    return response
   } catch (error) {
     console.error('Error creating subdomain:', error);
     throw error;
   }
 }
 
-export async function deleteSubdomain(appName: string): Promise<void> {
-  if (!zoneId) {
+export async function deleteSubdomain(subdomain: string): Promise<void> {
+  if (!ZoneId) {
     throw new Error('CLOUDFLARE_ZONE_ID is not set');
   }
 
-  const subdomain = `${appName}.yourdomain.com`;
-
   try {
-    // First, we need to find the DNS record ID
-    const records = await cf.dnsRecords.browse(zoneId);
-    const record = records.result.find(r => r.name === subdomain);
+    const record = await getSubdomain(subdomain);
 
-    if (!record) {
+    if (!record?.id) {
       console.log(`No DNS record found for ${subdomain}`);
       return;
     }
 
     // Delete the record
-    await cf.dnsRecords.del(zoneId, record.id);
+    await cf.dns.records.delete(record.id, {
+      zone_id: ZoneId,
+    });
 
     console.log(`Subdomain ${subdomain} deleted`);
   } catch (error) {

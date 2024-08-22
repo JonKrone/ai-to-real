@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "create-app": "tsx scripts/pipeline/createApp.js",
-    "deploy-app": "tsx scripts/pipeline/deployApp.js"
+    "deploy": "tsx scripts/cli.js deploy"
   },
   "author": "Jonathan Krone <JonathanKrone@gmail.com>",
   "license": "ISC",
@@ -17,10 +17,13 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.2.0",
+    "axios": "^1.7.4",
     "cloudflare": "^3.5.0",
+    "commander": "^12.1.0",
     "prettier": "^3.3.3",
     "tsx": "^4.17.0",
     "typescript": "^5.5.4",
+    "vercel": "^35.2.4",
     "zx": "^8.1.4"
   }
 }

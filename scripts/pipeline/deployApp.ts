@@ -1,41 +1,80 @@
-import fs from 'fs-extra';
-import path from 'node:path';
+import { $ } from 'zx';
+import { createSubdomain, getSubdomain } from './manageDNS';
 
-async function deployApp(appName: string, environment: string = 'dev'): Promise<void> {
-  const appDir = path.join(__dirname, '..', '..', '..', 'apps', appName);
+// Suppress zx's default output
+$.verbose = false;
 
-  // Ensure the app exists
-  if (!fs.existsSync(appDir)) {
-    throw new Error(`App "${appName}" does not exist.`);
+export async function deployApp({appName}: {appName: string}) {
+  console.log(`Starting deployment for new app: ${appName}`);
+
+  // Subdomains
+  // 1. Check if subdomain exists
+  // 2. If it does, great
+  // 3. If it doesn't, create it
+  // 3.1. Create the CNAME record in cloudflare
+  // 3.2. Configure Vercel to use the subdomain
+  const subdomain = appName
+  const subdomainExists = await getSubdomain(subdomain)
+  if (!subdomainExists) {
+    await createSubdomain(subdomain);
+    console.log(`Subdomain provisioned: ${subdomain}`);
   }
 
-  // Read the app's package.json to determine its type/requirements
-  const packageJsonPath = path.join(appDir, 'package.json');
-  const packageJson = await fs.readJson(packageJsonPath);
+  // Create Vercel project
+  const vercelProjectSlug = appName
+  const vercelExists = (await $`vercel ls ${vercelProjectSlug}`.text()).includes(`https://${vercelProjectSlug}`)
+  if (!vercelExists) {
+    await createVercelProject(appName)
+    console.log(`Vercel project ${vercelProjectSlug} created`);
+  }
 
-  console.log(`Deploying ${appName} (${packageJson.name}) to ${environment} environment`);
+  const fullUrl = `${subdomain}.krone.sh`
+  const vercelDomainExists = (await $`vercel domains inspect ${fullUrl}`.text()).includes(`${fullUrl} found`)
+  if (!vercelDomainExists) {
+    await addDomainToVercel(subdomain, vercelProjectSlug)
+    console.log(`Domain ${fullUrl} added to Vercel project ${vercelProjectSlug}`);
+  }
+  console.log('Vercel setup complete')
 
-  // TODO: Implement Supabase project creation
-  // TODO: Implement Vercel deployment
+  // 2. Create dev and prod Supabase databases
+  // const devDb = await createSupabaseProject(`${appName}-dev`, `${appName}DevPass123!`);
+  // const prodDb = await createSupabaseProject(`${appName}-prod`, `${appName}ProdPass123!`);
+  // console.log('Supabase projects created for dev and prod');
 
-  // TODO: Implement Cloudflare DNS configuration
-  // await createSubdomain(appName, vercelDeploymentUrl);
-  // // If you need to remove a deployment
-  // await deleteSubdomain(appName);
+  // 3. Configure Vercel
+  // await createSecret(`${appName}_DEV_DB_URL`, devDb.dbUrl);
+  // await createSecret(`${appName}_PROD_DB_URL`, prodDb.dbUrl);
+  // await createSecret(`${appName}_DEV_SUPABASE_KEY`, devDb.apiKey);
+  // await createSecret(`${appName}_PROD_SUPABASE_KEY`, prodDb.apiKey);
+  // console.log('Vercel configured with new secrets');
 
-  // The implementation of these TODOs will depend on the specific requirements of the app
-  // You may need to adjust the deployment process based on the app's package.json content
+  return
+
+  // 4. Build and deploy the app
+  // Assuming the app is in a directory named after the app
+  process.chdir(appName);
+
+  // Install dependencies
+  await $`npm install`;
+
+  // Apply Prisma migrations to both dev and prod
+  // await applyPrismaMigrations(devDb.projectRef, './prisma/schema.prisma');
+  // await applyPrismaMigrations(prodDb.projectRef, './prisma/schema.prisma');
+
+  // Build the app
+  await $`npm run build`;
+
+  // Deploy to Vercel
+  await $`vercel --prod`;
+
+  console.log(`Deployment completed for ${appName}`);
 }
 
-export default deployApp;
 
-// If run directly
-if (require.main === module) {
-  const appName = process.argv[2];
-  const environment = process.argv[3] || 'dev';
-  if (!appName) {
-    console.error('Please provide an app name');
-    process.exit(1);
-  }
-  deployApp(appName, environment);
+export const createVercelProject = async (appName: string) => {
+  await $`vercel projects add ${appName}`
+}
+
+export const addDomainToVercel = async (subdomain: string, vercelProjectId: string) => {
+  await $`vercel domains add ${subdomain} ${vercelProjectId}`
 }
