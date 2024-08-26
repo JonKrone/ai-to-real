@@ -106,7 +106,7 @@ export default function Home() {
           </p>
         </a>
       </div>
-      Test content 6
+      Test content 7
     </main>
   )
 }

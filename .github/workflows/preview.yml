@@ -27,27 +27,25 @@ jobs:
           dir_names_exclude_current_dir: true
           dir_names_max_depth: '2'
           files: apps/**
-          base_sha: 89bed326b8aeddfb29027be02fa1314fe95a6a4e
       - name: Print Changed Files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
-            echo "$file was changed"
+            echo "Changed file: $file"
+
+            if [[ $file == apps/* ]]; then
+              echo "Deploying $app_name"
+              app=$(echo $app_name | cut -d'/' -f2)
+
+              # Set up the app (this might include setting up environment variables, etc.)
+              npx tsx scripts/cli.js setup $app
+
+              npx tsx scripts/cli.js deploy $app
+            else
+              echo "$file was changed"
+            fi
           done
-
-      # - name: Setup Project and Domain
-      #   run: |
-      #     CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-      #     APP_NAMES=$(echo "$CHANGED_FILES" | grep '^apps/' | cut -d '/' -f 2 | sort | uniq)
-      #     echo "Changed apps: $APP_NAMES"
-      #     echo "APP_NAMES=$APP_NAMES" >> $GITHUB_ENV
-      #     # APP_PATH=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep '^apps/' | cut -d/ -f2 | uniq)
-      #     # echo "APP_PATH: $APP_PATH"
-      #     # if [ ! -z "$APP_PATH" ]; then
-      #     #   npx tsx scripts/cli.js setup $APP_PATH
-      #     # fi
-
       ## Preview Deployment
       # - name: Install Vercel CLI
       #   run: npm install --global vercel@latest

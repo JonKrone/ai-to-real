@@ -8,8 +8,12 @@ program
   .command('deploy')
   .description('Deploy an app')
   .argument('<appName>', 'The name of the app to deploy')
-  .action((appName) => {
-    deployApp({ appName })
+  .option('--prod', 'Deploy to production')
+  .action((appName, options) => {
+    deployApp({
+      appName,
+      // prod: options.prod
+    })
   })
 
 program

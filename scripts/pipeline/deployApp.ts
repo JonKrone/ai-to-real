@@ -1,18 +1,29 @@
+import path from 'path'
+import { $ } from 'zx'
 import { cloudflare } from '../lib/cloudflareClient'
 import { getFullDomain } from '../lib/domainUtils'
 import { vercel } from '../lib/vercelClient'
 
 export async function deployApp({ appName }: { appName: string }) {
-  await setupProjectAndDomain({ appName })
+  // Presuming we're already set up
+  // await setupProjectAndDomain({ appName })
 
-  return
+  // To deploy: 1. cd to project dir, `apps/<appName>`, 2. vercel pull env, 3. vercel build, 4. vercel deploy --prebuilt
+  const appDir = path.join(process.cwd(), 'apps', appName)
 
-  // The following code is commented out as it is not currently used
-  // process.chdir(appName)
-  // await $`npm install`
-  // await $`npm run build`
-  // await $`vercel --prod`
-  // console.log(`Deployment completed for ${appName}`)
+  console.log(`Changing directory to: ${appDir}`)
+  process.chdir(appDir)
+
+  console.log('Pulling Vercel environment variables...')
+  await $`vercel pull --yes --environment=production --token=${process.env.VERCEL_TOKEN}`
+
+  console.log('Building project...')
+  await $`vercel build --token=${process.env.VERCEL_TOKEN}`
+
+  console.log('Deploying project...')
+  await $`vercel deploy --prebuilt --prod --token=${process.env.VERCEL_TOKEN}`
+
+  console.log(`Deployment completed for ${appName}`)
 }
 
 export async function setupProjectAndDomain({ appName }: { appName: string }) {
