@@ -8,7 +8,7 @@ const cf = new Cloudflare({
 const ZoneId = process.env.CLOUDFLARE_ZONE_ID
 const VercelCNAME = 'cname.vercel-dns.com'
 
-const cloudflare = {
+export const cloudflare = {
   dns: {
     getSubdomain: async (subdomain: string) => {
       if (!ZoneId) {
@@ -82,5 +82,3 @@ const cloudflare = {
     },
   },
 }
-
-export { cloudflare }
