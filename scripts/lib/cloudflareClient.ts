@@ -8,7 +8,7 @@ const cf = new Cloudflare({
 const ZoneId = process.env.CLOUDFLARE_ZONE_ID
 const VercelCNAME = 'cname.vercel-dns.com'
 
-const cloudflareClient = {
+const cloudflare = {
   dns: {
     getSubdomain: async (subdomain: string) => {
       if (!ZoneId) {
@@ -53,7 +53,7 @@ const cloudflareClient = {
       }
 
       try {
-        const record = await cloudflareClient.dns.getSubdomain(subdomain)
+        const record = await cloudflare.dns.getSubdomain(subdomain)
 
         if (!record?.id) {
           console.log(`No DNS record found for ${subdomain}`)
@@ -72,9 +72,9 @@ const cloudflareClient = {
       }
     },
     findOrCreateSubdomain: async (subdomain: string) => {
-      const subdomainExists = await cloudflareClient.dns.getSubdomain(subdomain)
+      const subdomainExists = await cloudflare.dns.getSubdomain(subdomain)
       if (!subdomainExists) {
-        await cloudflareClient.dns.createSubdomain(subdomain)
+        await cloudflare.dns.createSubdomain(subdomain)
         console.log(`Subdomain provisioned: ${subdomain}`)
       } else {
         console.log(`Subdomain ${subdomain} already exists`)
@@ -83,4 +83,4 @@ const cloudflareClient = {
   },
 }
 
-export { cloudflareClient }
+export { cloudflare }

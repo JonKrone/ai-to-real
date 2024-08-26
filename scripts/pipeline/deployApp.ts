@@ -1,16 +1,9 @@
-import { cloudflareClient } from '../lib/cloudflareClient'
+import { cloudflare } from '../lib/cloudflareClient'
 import { getFullDomain } from '../lib/domainUtils'
-import { vercelClient } from '../lib/vercelClient'
+import { vercel } from '../lib/vercelClient'
 
 export async function deployApp({ appName }: { appName: string }) {
-  await cloudflareClient.dns.findOrCreateSubdomain(appName)
-
-  await vercelClient.projects.findOrCreateProject(appName)
-
-  const fullUrl = getFullDomain(appName)
-  await vercelClient.projects.findOrCreateDomain(appName, fullUrl)
-
-  console.log('Vercel setup complete')
+  await setupProjectAndDomain({ appName })
 
   return
 
@@ -20,4 +13,14 @@ export async function deployApp({ appName }: { appName: string }) {
   // await $`npm run build`
   // await $`vercel --prod`
   // console.log(`Deployment completed for ${appName}`)
+}
+
+export async function setupProjectAndDomain({ appName }: { appName: string }) {
+  await cloudflare.dns.findOrCreateSubdomain(appName)
+
+  await vercel.projects.findOrCreateProject(appName)
+
+  await vercel.projects.findOrCreateDomain(appName, getFullDomain(appName))
+
+  // At some point we need to create a .vercel/project.json file with the correct projectId
 }

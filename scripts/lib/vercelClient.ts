@@ -7,7 +7,7 @@ const vercelRequest = axios.create({
   },
 })
 
-const vercelClient = {
+const vercel = {
   projects: {
     addDomain: async (
       projectId: string,
@@ -44,9 +44,9 @@ const vercelClient = {
       return projects.some((project) => project.name === appName)
     },
     findOrCreateProject: async (appName: string): Promise<void> => {
-      const projectExists = await vercelClient.projects.hasProject(appName)
+      const projectExists = await vercel.projects.hasProject(appName)
       if (!projectExists) {
-        await vercelClient.projects.createProject(appName)
+        await vercel.projects.createProject(appName)
         console.log(`Vercel project ${appName} created`)
       } else {
         console.log(`Vercel project ${appName} already exists`)
@@ -56,12 +56,9 @@ const vercelClient = {
       projectId: string,
       domain: string,
     ): Promise<void> => {
-      const domainExists = await vercelClient.projects.hasDomain(
-        projectId,
-        domain,
-      )
+      const domainExists = await vercel.projects.hasDomain(projectId, domain)
       if (!domainExists) {
-        await vercelClient.projects.addDomain(projectId, domain)
+        await vercel.projects.addDomain(projectId, domain)
         console.log(`Domain ${domain} added to Vercel project ${projectId}`)
       } else {
         console.log(
@@ -108,4 +105,4 @@ interface ListProjectsResponse {
   }>
 }
 
-export { vercelClient }
+export { vercel }
