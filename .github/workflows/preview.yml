@@ -1,6 +1,7 @@
 name: Preview Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
   # VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
@@ -55,14 +56,3 @@ jobs:
       #   run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       # - name: Deploy Project Artifacts to Vercel
       #   run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-
-      # - name: Deploy App
-      #   env:
-      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      #     # CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     # SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      #   run: |
-      #     APP_PATH=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep '^apps/' | cut -d/ -f2 | uniq)
-      #     if [ ! -z "$APP_PATH" ]; then
-      #       npx tsx scripts/pipeline/deployApp.ts $APP_PATH
-      #     fi
