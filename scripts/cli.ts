@@ -12,7 +12,7 @@ program
   .action((appName, options) => {
     deployApp({
       appName,
-      // prod: options.prod
+      prod: options.prod,
     })
   })
 

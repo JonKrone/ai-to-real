@@ -4,7 +4,13 @@ import { cloudflare } from '../lib/cloudflareClient'
 import { getFullDomain } from '../lib/domainUtils'
 import { vercel } from '../lib/vercelClient'
 
-export async function deployApp({ appName }: { appName: string }) {
+export async function deployApp({
+  appName,
+  prod,
+}: {
+  appName: string
+  prod: boolean
+}) {
   // Presuming we're already set up
   // await setupProjectAndDomain({ appName })
 
@@ -15,13 +21,13 @@ export async function deployApp({ appName }: { appName: string }) {
   process.chdir(appDir)
 
   console.log('Pulling Vercel environment variables...')
-  await $`vercel pull --yes --environment=production --token=${process.env.VERCEL_TOKEN}`
+  await $`vercel pull --yes --environment=${prod ? 'production' : 'preview'} --token=${process.env.VERCEL_TOKEN}`
 
   console.log('Building project...')
-  await $`vercel build --token=${process.env.VERCEL_TOKEN}`
+  await $`vercel build ${prod ? '--prod' : ''} --token=${process.env.VERCEL_TOKEN}`
 
   console.log('Deploying project...')
-  await $`vercel deploy --prebuilt --token=${process.env.VERCEL_TOKEN}`
+  await $`vercel deploy --prebuilt ${prod ? '--prod' : ''} --token=${process.env.VERCEL_TOKEN}`
 
   console.log(`Deployment completed for ${appName}`)
 }
