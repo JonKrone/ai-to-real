@@ -9,6 +9,10 @@ on:
     paths:
       - 'apps/**'
       - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'apps/**'
+      - '.github/workflows/**'
 
 jobs:
   deploy:
