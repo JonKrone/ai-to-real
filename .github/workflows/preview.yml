@@ -1,14 +1,11 @@
 name: Preview Deployment
 env:
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
   CLOUDFLARE_KRONE_SH_DNS_TOKEN: ${{ secrets.CLOUDFLARE_KRONE_SH_DNS_TOKEN }}
 
 on:
-  push:
-    paths:
-      - 'apps/**'
-      - '.github/workflows/**'
   pull_request:
     paths:
       - 'apps/**'
@@ -40,12 +37,13 @@ jobs:
             echo "Changed file: $file"
 
             if [[ $file == apps/* ]]; then
-            app=$(echo $file | cut -d'/' -f2)
-            echo "Deploying $app"
+              app=$(echo $file | cut -d'/' -f2)
 
+              echo "Ensuring $app is setup"
               # Set up the app (this might include setting up environment variables, etc.)
               npx tsx scripts/cli.js setup $app
 
+              echo "Deploying $app"
               npx tsx scripts/cli.js deploy $app
             else
               echo "$file was changed"
