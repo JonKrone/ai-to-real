@@ -21,7 +21,7 @@ export async function deployApp({ appName }: { appName: string }) {
   await $`vercel build --token=${process.env.VERCEL_TOKEN}`
 
   console.log('Deploying project...')
-  await $`vercel deploy --prebuilt --prod --token=${process.env.VERCEL_TOKEN}`
+  await $`vercel deploy --prebuilt --token=${process.env.VERCEL_TOKEN}`
 
   console.log(`Deployment completed for ${appName}`)
 }
