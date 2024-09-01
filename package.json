@@ -7,6 +7,9 @@
     "create-app": "tsx scripts/pipeline/createApp.js",
     "deploy": "tsx scripts/cli.js deploy"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "author": "Jonathan Krone <JonathanKrone@gmail.com>",
   "license": "ISC",
   "dependencies": {
@@ -23,7 +26,7 @@
     "prettier": "^3.3.3",
     "tsx": "^4.17.0",
     "typescript": "^5.5.4",
-    "vercel": "^35.2.4",
+    "vercel": "^37.2.1",
     "zx": "^8.1.4"
   }
 }

@@ -1,5 +1,5 @@
 import path from 'path'
-import { $ } from 'zx'
+import { $, cd } from 'zx'
 import { cloudflare } from '../lib/cloudflareClient'
 import { getFullDomain } from '../lib/domainUtils'
 import { vercel } from '../lib/vercelClient'
@@ -16,15 +16,18 @@ export async function deployApp({
 
   // To deploy: 1. cd to project dir, `apps/<appName>`, 2. vercel pull env, 3. vercel build, 4. vercel deploy --prebuilt
   const appDir = path.join(process.cwd(), 'apps', appName)
+  cd(appDir)
 
   console.log(`Changing directory to: ${appDir}`)
-  process.chdir(appDir)
 
   console.log('Pulling Vercel environment variables...')
+  await $`vercel pull --yes --token=${process.env.VERCEL_TOKEN}`
   await $`vercel pull --yes --environment=${prod ? 'production' : 'preview'} --token=${process.env.VERCEL_TOKEN}`
 
+  console.log('node v:', await $`node -v`)
+
   console.log('Building project...')
-  await $`vercel build ${prod ? '--prod' : ''} --token=${process.env.VERCEL_TOKEN}`
+  await $`vercel build ${prod ? '--prod' : ''} --token=${process.env.VERCEL_TOKEN} --debug`
 
   console.log('Deploying project...')
   await $`vercel deploy --prebuilt ${prod ? '--prod' : ''} --token=${process.env.VERCEL_TOKEN}`
