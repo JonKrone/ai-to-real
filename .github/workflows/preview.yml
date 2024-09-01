@@ -28,15 +28,14 @@ jobs:
           dir_names_exclude_current_dir: true
           dir_names_max_depth: '2'
           files: apps/**
-      - name: Print Changed Files
+      - name: Deploy Changed Apps
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
-            echo "Changed file: $file"
-
             if [[ $file == apps/* ]]; then
               app=$(echo $file | cut -d'/' -f2)
+              echo "$app changed"
 
               echo "Ensuring $app is setup"
               # Set up the app (this might include setting up environment variables, etc.)
@@ -44,7 +43,5 @@ jobs:
 
               echo "Deploying $app"
               npx tsx scripts/cli.js deploy $app
-            else
-              echo "$file was changed"
             fi
           done

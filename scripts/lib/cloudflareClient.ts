@@ -1,12 +1,13 @@
 import { Cloudflare } from 'cloudflare'
 import { getFullDomain } from './domainUtils'
 
-const cf = new Cloudflare({
-  apiToken: process.env.CLOUDFLARE_KRONE_SH_DNS_TOKEN,
-})
-
 const ZoneId = process.env.CLOUDFLARE_ZONE_ID
 const VercelCNAME = 'cname.vercel-dns.com'
+const ApiToken = process.env.CLOUDFLARE_KRONE_SH_DNS_TOKEN
+
+const cf = new Cloudflare({
+  apiToken: ApiToken,
+})
 
 export const cloudflare = {
   dns: {
