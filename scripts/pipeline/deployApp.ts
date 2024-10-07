@@ -29,6 +29,7 @@ export async function deployApp({
 }
 
 export async function setupProjectAndDomain({ appName }: { appName: string }) {
+  // TODO: To better support preview deployments, consider creating a ${appname}-preview domain
   await cloudflare.dns.findOrCreateSubdomain(appName)
   await vercel.projects.findOrCreateProject(appName)
   await vercel.projects.findOrCreateDomain(appName, getFullDomain(appName))
